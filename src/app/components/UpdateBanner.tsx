@@ -42,7 +42,7 @@ export function UpdateBanner() {
     <div className="fixed top-0 left-0 right-0 z-[100] bg-blue-600 text-white px-4 py-3 shadow-lg flex items-center justify-center sm:justify-between flex-wrap gap-3 animate-in slide-in-from-top">
       <div className="flex items-center gap-2 font-medium text-sm sm:text-base">
         <AlertCircle className="w-5 h-5" />
-        <span>A new version of Mighty AI QR is available.</span>
+        <span>A new version of Robo_Panda is available.</span>
       </div>
       <button
         onClick={() => window.location.reload()}
