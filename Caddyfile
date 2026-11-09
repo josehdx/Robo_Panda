@@ -1,0 +1,5 @@
+# Replace 'yourdomain.com' with your actual domain name
+yourdomain.com {
+    # Forward all traffic to the Next.js container on port 3000
+    reverse_proxy app:3000
+}

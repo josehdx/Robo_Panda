@@ -1,0 +1,49 @@
+{
+  "name": "mighty-ai-qr-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^4.0.114",
+    "@ai-sdk/openai": "^4.0.111",
+    "@ai-sdk/react": "^4.0.170",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "@tavily/core": "^1.0.0",
+    "@teispace/next-themes": "^3.1.0",
+    "ai": "^7.0.166",
+    "dotenv": "^18.0.10",
+    "html5-qrcode": "^2.3.8",
+    "jsqr": "^1.4.0",
+    "lucide-react": "^1.70.0",
+    "next": "16.4.5",
+    "pg": "^8.23.1",
+    "qrcode": "^1.5.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/pg": "^8.23.1",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.6.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "postcss": "^8.5.32",
+    "prisma": "^7.10.1",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^5"
+  }
+}
