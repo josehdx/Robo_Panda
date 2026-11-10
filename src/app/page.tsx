@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import { Send, Download, Loader2, Bot, User, ExternalLink, Headset } from "lucide-react";
 
 export default function Home() {
-  // 1. Revert to empty useChat() to fix the Type Error
   const { messages, sendMessage, status } = useChat();
   
   const [input, setInput] = useState("");
@@ -41,7 +40,7 @@ export default function Home() {
     <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto w-full bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         
-        {/* 2. Render the Welcome Message manually when chat is empty */}
+        {/* Render Welcome Message when chat is empty */}
         {messages.length === 0 && (
           <div className="flex items-start gap-3 flex-row">
             <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
@@ -106,6 +105,30 @@ export default function Home() {
                       </p>
                     </div>
                   );
+                }
+
+                // Handle search_canvas
+                const isSearchTool =
+                  part.type === "tool-search_canvas" ||
+                  (part.type === "tool-invocation" &&
+                    part.toolInvocation?.toolName === "search_canvas");
+
+                if (isSearchTool) {
+                  const state = part.state ?? part.toolInvocation?.state;
+                  const isPending =
+                    state === "input-streaming" ||
+                    state === "input-available" ||
+                    state === "call";
+
+                  if (isPending) {
+                    return (
+                      <div key={index} className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-white/60 dark:bg-gray-800/60 px-3 py-2 rounded-xl mb-2 border border-gray-100 dark:border-gray-700 w-fit">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                        Searching Canvas Community guides...
+                      </div>
+                    );
+                  }
+                  return null; // Hide spinner when search finishes
                 }
 
                 // Handle generate_doc_link

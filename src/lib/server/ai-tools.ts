@@ -1,9 +1,14 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 
-// NOTE: Make sure to import your existing Tavily and QR functions here!
-// import { tavilySearch } from './tavily';
-// import { generateQrDataUrl } from './qr-encoder';
+// 1. Fixed the QR import to match your file exactly
+import { generateQRDataURL } from './qr-encoder';
+
+// 2. TAVILY IMPORT FIX: 
+// If your tavily.ts file exports a function named 'search', use this:
+// import { search as tavilySearch } from './tavily';
+// If it exports 'tavily', use: import { tavily as tavilySearch } from './tavily';
+import { tavilySearch } from './tavily'; // <--- Update this line based on what is actually inside your tavily.ts file!
 
 export const search_canvas = tool({
   description: 'Search the official Instructure Canvas Community documentation.',
@@ -13,19 +18,17 @@ export const search_canvas = tool({
   }),
   execute: async ({ query, userRole }: { query: string; userRole: string }) => {
     try {
-      // Append the role to the search query to force role-specific articles
       const roleFilter = userRole !== 'unknown' ? ` for ${userRole}` : '';
       const optimizedQuery = `${query}${roleFilter}`;
 
-      // Execute your Tavily search (Uncomment and adapt to your actual function)
-      // const results = await tavilySearch(optimizedQuery, { include_domains: ["community.instructure.com"] });
-      // return { success: true, optimizedQuery, results };
+      const results = await tavilySearch(optimizedQuery, { include_domains: ["community.instructure.com"] });
       
-      // Temporary return to satisfy TypeScript until you plug in your tavily function
-      return { success: true, optimizedQuery, results: [] }; 
+      // 3. Fixed Type Overload: Both try/catch now return the exact same object keys
+      return { success: true, optimizedQuery, results, error: undefined };
     } catch (error) {
       console.error("Canvas Search Error:", error);
-      return { success: false, error: "Failed to search Canvas documentation." };
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, optimizedQuery: query, results: [], error: `Failed to search: ${errorMessage}` };
     }
   },
 });
@@ -38,15 +41,15 @@ export const generate_doc_link = tool({
   }),
   execute: async ({ url, title }: { url: string; title: string }) => {
     try {
-      // Execute your QR generation (Uncomment and adapt to your actual function)
-      // const qrDataUrl = await generateQrDataUrl(url);
-      // return { success: true, url, title, qrDataUrl };
-
-      // Temporary return to satisfy TypeScript until you plug in your QR function
-      return { success: true, url, title, qrDataUrl: "" }; 
+      // Used the corrected function name here
+      const qrDataUrl = await generateQRDataURL(url);
+      
+      // 3. Fixed Type Overload: Both try/catch now return the exact same object keys
+      return { success: true, url, title, qrDataUrl, error: undefined };
     } catch (error) {
       console.error("QR Generation Error:", error);
-      return { success: false, error: "Failed to generate QR code." };
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, url, title, qrDataUrl: "", error: `Failed to generate QR code: ${errorMessage}` };
     }
   }
 });
@@ -57,7 +60,6 @@ export const escalate_to_human = tool({
     reason: z.string().describe('The reason for escalating to a human.'),
   }),
   execute: async ({ reason }: { reason: string }) => {
-    // This tells the UI that the escalation was successful so it can render the Live Chat UI
     return { success: true, escalated: true, reason };
   }
 });
