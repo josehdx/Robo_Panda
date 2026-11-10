@@ -2,10 +2,12 @@
 
 import { useChat } from "@ai-sdk/react";
 import { useState, useEffect, useRef } from "react";
-import { Send, Download, Loader2, Bot, User, ExternalLink } from "lucide-react";
+import { Send, Download, Loader2, Bot, User, ExternalLink, Headset } from "lucide-react";
 
 export default function Home() {
+  // 1. Revert to empty useChat() to fix the Type Error
   const { messages, sendMessage, status } = useChat();
+  
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -37,15 +39,26 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto w-full bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
-      {/* Scrollable Message List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        
+        {/* 2. Render the Welcome Message manually when chat is empty */}
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 space-y-4">
-            <Bot className="w-12 h-12 text-blue-500 opacity-50" />
-            <p className="text-center">
-              Hello! I am your Canvas LMS Documentation Assistant. <br />
-              Ask me any question about assignments, rubrics, quizzes, or course setup!
-            </p>
+          <div className="flex items-start gap-3 flex-row">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+              <Bot size={16} />
+            </div>
+            <div className="flex flex-col max-w-[80%] items-start">
+              <div className="px-4 py-3 rounded-2xl mb-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-tl-none shadow-sm">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                  Hello! I am your Instructure Canvas LMS support assistant.{"\n\n"}
+                  I am here to help educators, students, and administrators with anything related to Canvas LMS. Here is what I can do for you:{"\n\n"}
+                  - **Answer How-To Questions:** Provide step-by-step guidance on setting up courses, using SpeedGrader, managing assignments, configuring rubrics, handling quizzes, managing grades, and more.{"\n"}
+                  - **Find Official Documentation:** Search the official Canvas Community guides to ensure you get accurate, up-to-date instructions.{"\n"}
+                  - **Provide Direct Links & QR Codes:** Generate direct links and QR codes to Canvas documentation so you can easily access full guides on any device.{"\n\n"}
+                  How can I help you with Canvas today?
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -56,7 +69,6 @@ export default function Home() {
               m.role === "user" ? "flex-row-reverse" : "flex-row"
             }`}
           >
-            {/* Avatar */}
             <div
               className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                 m.role === "user"
@@ -67,7 +79,6 @@ export default function Home() {
               {m.role === "user" ? <User size={16} /> : <Bot size={16} />}
             </div>
 
-            {/* Message Content Container */}
             <div
               className={`flex flex-col max-w-[80%] ${
                 m.role === "user" ? "items-end" : "items-start"
@@ -75,7 +86,6 @@ export default function Home() {
             >
               {m.parts?.map((part: any, index: number) => {
                 if (part.type === "text") {
-                  // Strip raw image tokens if emitted by the model
                   const cleanedText = part.text
                     .replace(/!\[\]\(\$QR_IMAGE_\d+\$\)/g, "")
                     .trim();
@@ -98,7 +108,7 @@ export default function Home() {
                   );
                 }
 
-                // Match AI SDK 7 tool part type or legacy fallback
+                // Handle generate_doc_link
                 const isDocLinkTool =
                   part.type === "tool-generate_doc_link" ||
                   (part.type === "tool-invocation" &&
@@ -163,6 +173,37 @@ export default function Home() {
                   );
                 }
 
+                // Handle escalate_to_human
+                const isEscalateTool =
+                  part.type === "tool-escalate_to_human" ||
+                  (part.type === "tool-invocation" &&
+                    part.toolInvocation?.toolName === "escalate_to_human");
+                    
+                if (isEscalateTool) {
+                  const state = part.state ?? part.toolInvocation?.state;
+                  const isPending =
+                    state === "input-streaming" ||
+                    state === "input-available" ||
+                    state === "call";
+
+                  if (isPending) return null;
+
+                  return (
+                    <div key={index} className="mt-2 w-full max-w-sm">
+                      <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-200 dark:border-red-800/50 flex flex-col gap-3 items-center text-center shadow-sm">
+                        <Headset className="w-6 h-6 text-red-600 dark:text-red-400" />
+                        <p className="text-sm text-red-800 dark:text-red-200 font-medium">Connecting you to a human agent...</p>
+                        <button 
+                          onClick={() => window.open('https://help.instructure.com', '_blank')} 
+                          className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition-colors"
+                        >
+                          Open Live Support
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
                 return null;
               })}
             </div>
@@ -171,7 +212,6 @@ export default function Home() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Form */}
       <form
         onSubmit={onSubmit}
         className="p-4 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
